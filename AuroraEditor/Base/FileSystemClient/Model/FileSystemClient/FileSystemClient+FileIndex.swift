@@ -13,7 +13,10 @@ extension FileSystemClient {
     /// - Parameter url: The URL of the directory to load the items of
     /// - Returns: `[FileItem]` representing the contents of the directory
     func loadFiles(fromURL url: URL) throws -> [FileItem] {
-        let directoryContents = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+        let directoryContents = try fileManager.contentsOfDirectory(
+            at: url.resolvingSymlinksInPath(),
+            includingPropertiesForKeys: nil
+        )
         var items: [FileItem] = []
         for itemURL in directoryContents {
             // Skip file if it is in ignore list
@@ -54,8 +57,10 @@ extension FileSystemClient {
         var didChangeSomething = false
 
         // get the actual directory children
-        let directoryContentsUrls = try fileManager.contentsOfDirectory(at: fileItem.url,
-                                                                        includingPropertiesForKeys: nil)
+        let directoryContentsUrls = try fileManager.contentsOfDirectory(
+            at: fileItem.url.resolvingSymlinksInPath(),
+            includingPropertiesForKeys: nil
+        )
 
         // test for deleted children, and remove them from the index
         for oldContent in fileItem.children ?? [] where !directoryContentsUrls.contains(oldContent.url) {
